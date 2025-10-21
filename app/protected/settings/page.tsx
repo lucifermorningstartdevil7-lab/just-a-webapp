@@ -8,7 +8,7 @@ import { Eye, EyeOff, Check, Trash2 } from "lucide-react";
 export default function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("user@example.com");
-  const [username, setUsername] = useState("yourusername");
+  const [username] = useState("yourusername");
   const [displayName, setDisplayName] = useState("Your Name");
   const [saved, setSaved] = useState(false);
 

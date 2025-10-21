@@ -1,15 +1,14 @@
-// /protected/layout.tsx
 'use client'
 import { useState } from "react";
-import DashboardSidebar from "@/app/protected/sidebar/page";
-import { DashboardNavbar } from "@/app/protected/navbar/page";
+import DashboardSidebar from "@/components/dashboard/sidebar";
+import { DashboardNavbar } from "@/components/dashboard/navbar";
 
 export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen] = useState(true);
 
   return (
     <div className="fixed inset-0 bg-black overflow-hidden">
@@ -21,7 +20,7 @@ export default function ProtectedLayout({
 
       {/* Sidebar - Fixed */}
       <div className="fixed left-0 top-0 h-full z-40">
-        <DashboardSidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <DashboardSidebar sidebarOpen={sidebarOpen} />
       </div>
 
       {/* Navbar - Fixed */}

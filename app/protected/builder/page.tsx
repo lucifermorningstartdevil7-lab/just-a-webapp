@@ -1,13 +1,24 @@
 'use client'
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Eye, EyeOff, GripVertical, Star, TrendingUp, Zap, Lock } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, GripVertical, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+
+interface Link {
+  id: number;
+  title: string;
+  url: string;
+  type: string;
+  description: string;
+  active: boolean;
+  pinned: boolean;
+  clickCount: number;
+}
 
 const linkTypes = [
   { value: 'featured', label: 'Featured Work', icon: '⭐' },
@@ -20,16 +31,16 @@ const linkTypes = [
   { value: 'custom', label: 'Custom', icon: '🔗' },
 ];
 
-export default function builder() {
-  const [links, setLinks] = useState([]);
+export default function Builder() {
+  const [links, setLinks] = useState<Link[]>([]);
   const [creatorName, setCreatorName] = useState('');
   const [tagline, setTagline] = useState('');
   const [category, setCategory] = useState('');
   const [stats, setStats] = useState({ followers: '', views: '', posts: '' });
-  const [pinnedLinks, setPinnedLinks] = useState([]);
+  const [pinnedLinks, setPinnedLinks] = useState<number[]>([]);
 
   const addLink = () => {
-    const newLink = {
+    const newLink: Link = {
       id: Date.now(),
       title: '',
       url: '',
@@ -42,15 +53,15 @@ export default function builder() {
     setLinks([...links, newLink]);
   };
 
-  const updateLink = (id, field, value) => {
+  const updateLink = (id: number, field: keyof Link, value: string | boolean) => {
     setLinks(links.map(link => link.id === id ? { ...link, [field]: value } : link));
   };
 
-  const deleteLink = (id) => {
+  const deleteLink = (id: number) => {
     setLinks(links.filter(link => link.id !== id));
   };
 
-  const togglePin = (id) => {
+  const togglePin = (id: number) => {
     if (pinnedLinks.includes(id)) {
       setPinnedLinks(pinnedLinks.filter(pid => pid !== id));
     } else {
@@ -59,11 +70,11 @@ export default function builder() {
     updateLink(id, 'pinned', !pinnedLinks.includes(id));
   };
 
-  const toggleLink = (id) => {
+  const toggleLink = (id: number) => {
     setLinks(links.map(link => link.id === id ? { ...link, active: !link.active } : link));
   };
 
-  const getLinkIcon = (type) => linkTypes.find(t => t.value === type)?.icon || '🔗';
+  const getLinkIcon = (type: string) => linkTypes.find(t => t.value === type)?.icon || '🔗';
 
   const activePinnedLinks = links.filter(l => l.active && pinnedLinks.includes(l.id));
   const activeRegularLinks = links.filter(l => l.active && !pinnedLinks.includes(l.id));
@@ -221,14 +232,14 @@ export default function builder() {
                             <Star className="w-4 h-4" fill={pinnedLinks.includes(link.id) ? 'currentColor' : 'none'} />
                           </Button>
                         </div>
-                        
+
                         <Input
                           value={link.title}
                           onChange={(e) => updateLink(link.id, 'title', e.target.value)}
                           placeholder="Link title"
                           className="bg-neutral-700 border-neutral-600 text-neutral-100 placeholder:text-neutral-500"
                         />
-                        
+
                         <Input
                           value={link.url}
                           onChange={(e) => updateLink(link.id, 'url', e.target.value)}

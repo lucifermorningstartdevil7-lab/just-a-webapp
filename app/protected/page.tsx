@@ -1,14 +1,8 @@
-// app/dashboard/page.tsx (Server Component)
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import DashboardLayout from "./layout";
-
 
 export default async function ProtectedDashboard() {
   const supabase = await createClient();
-
-  
-
 
   const {
     data: { session },
@@ -24,5 +18,10 @@ export default async function ProtectedDashboard() {
     sites: [],
   };
 
-  return <DashboardLayout userData={userData} />;
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-white mb-4">Dashboard</h1>
+      <p className="text-gray-400">Welcome, {userData.username}!</p>
+    </div>
+  );
 }

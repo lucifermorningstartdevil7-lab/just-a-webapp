@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, Bell, Settings } from "lucide-react";
+import { Menu, Bell } from "lucide-react";
 
 export function DashboardNavbar() {
   return (

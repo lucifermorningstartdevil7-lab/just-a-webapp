@@ -1,15 +1,12 @@
 'use client'
 import { motion } from "framer-motion"
 import {
-  Menu,
-  X,
   LogOut,
   Settings,
   Share2,
   BarChart3,
   Palette,
   Link as LinkIcon,
-  User,
   Home,
 } from "lucide-react"
 import Link from "next/link"
@@ -18,12 +15,10 @@ import { cn } from "@/lib/utils"
 
 interface DashboardSidebarProps {
   sidebarOpen: boolean
-  setSidebarOpen: (open: boolean) => void
 }
 
 export default function DashboardSidebar({
   sidebarOpen,
-  setSidebarOpen,
 }: DashboardSidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -40,7 +35,7 @@ export default function DashboardSidebar({
       id: "customize",
       label: "Customize",
       icon: Palette,
-      href: "/protected/customize",
+      href: "/protected/customization",
     },
     {
       id: "analytics",
@@ -57,7 +52,7 @@ export default function DashboardSidebar({
       animate={{ width: sidebarOpen ? 260 : 78 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className="bg-neutral-950 border-r border-neutral-800 flex flex-col h-full">
-    
+
 
       {/* Navigation */}
       <div className="flex-1 px-3 py-6 space-y-1 overflow-y-auto scrollbar-none">
