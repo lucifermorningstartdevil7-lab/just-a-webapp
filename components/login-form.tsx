@@ -1,45 +1,34 @@
 "use client";
 
-
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
-import { Label } from "@/app/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-export function SignUpForm() {
+export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
-    if (password !== repeatPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
-        },
       });
       if (error) throw error;
-      router.push("/auth/sign-up-success");
+      router.push("/protected");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -70,7 +59,7 @@ export function SignUpForm() {
           className="text-center mb-8 sm:mb-12"
         >
           <Link href="/" className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent inline-block hover:opacity-80 transition-opacity">
-            ClickSprout
+            LinkTrim
           </Link>
         </motion.div>
 
@@ -88,11 +77,11 @@ export function SignUpForm() {
             animate="animate"
             className="space-y-1 sm:space-y-2"
           >
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Get started</h1>
-            <p className="text-sm sm:text-base text-gray-400">Create your ClickSprout account</p>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">Welcome back</h1>
+            <p className="text-sm sm:text-base text-gray-400">Sign in to your account</p>
           </motion.div>
 
-          <form onSubmit={handleSignUp} className="space-y-5 sm:space-y-6">
+          <form onSubmit={handleLogin} className="space-y-5 sm:space-y-6">
             {/* Email Field */}
             <motion.div
               variants={fadeInUp}
@@ -119,7 +108,15 @@ export function SignUpForm() {
               animate="animate"
               className="space-y-2"
             >
-              <Label htmlFor="password" className="text-sm text-gray-200 font-semibold">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-sm text-gray-200 font-semibold">Password</Label>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors"
+                >
+                  Forgot?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"
@@ -127,25 +124,6 @@ export function SignUpForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-neutral-800/60 border border-neutral-700/50 rounded-lg px-4 py-2.5 sm:py-3 text-white text-sm sm:text-base placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all"
-              />
-            </motion.div>
-
-            {/* Repeat Password Field */}
-            <motion.div
-              variants={fadeInUp}
-              initial="initial"
-              animate="animate"
-              className="space-y-2"
-            >
-              <Label htmlFor="repeat-password" className="text-sm text-gray-200 font-semibold">Confirm Password</Label>
-              <Input
-                id="repeat-password"
-                type="password"
-                placeholder="••••••••"
-                required
-                value={repeatPassword}
-                onChange={(e) => setRepeatPassword(e.target.value)}
                 className="w-full bg-neutral-800/60 border border-neutral-700/50 rounded-lg px-4 py-2.5 sm:py-3 text-white text-sm sm:text-base placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all"
               />
             </motion.div>
@@ -172,23 +150,23 @@ export function SignUpForm() {
                 disabled={isLoading}
                 className="w-full bg-white text-black hover:bg-gray-200 font-bold py-2.5 sm:py-3 text-sm sm:text-base rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Creating account..." : "Sign Up"}
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </motion.div>
 
-            {/* Login Link */}
+            {/* Sign Up Link */}
             <motion.div
               variants={fadeInUp}
               initial="initial"
               animate="animate"
               className="text-center text-xs sm:text-sm text-gray-400"
             >
-              Already have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
-                href="/auth/login"
+                href="/auth/sign-up"
                 className="text-white font-semibold hover:text-gray-200 transition-colors"
               >
-                Sign in
+                Sign up
               </Link>
             </motion.div>
           </form>

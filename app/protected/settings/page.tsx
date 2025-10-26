@@ -8,10 +8,16 @@ import { createClient } from '@/lib/supabase/client';
 
 export default function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false);
+<<<<<<< HEAD
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [pageSlug, setPageSlug] = useState("");
+=======
+  const [email, setEmail] = useState("user@example.com");
+  const [username] = useState("yourusername");
+  const [displayName, setDisplayName] = useState("Your Name");
+>>>>>>> 59c4acd742833a567c3817b01f237bc2978a0525
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
