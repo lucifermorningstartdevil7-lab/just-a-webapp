@@ -1,20 +1,18 @@
 'use client'
 import { motion } from "framer-motion"
 import {
-  Menu,
-  X,
   LogOut,
   Settings,
   Share2,
   BarChart3,
   Palette,
   Link as LinkIcon,
-  User,
   Home,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useState } from "react"
 
 interface DashboardSidebarProps {
   sidebarOpen: boolean
@@ -27,9 +25,10 @@ export default function DashboardSidebar({
 }: DashboardSidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const [isHovered, setIsHovered] = useState(false)
 
   const menuItems = [
-    { id: "overview", label: "Overview", icon: Home, href: "/protected" },
+    { id: "overview", label: "Overview", icon: Home, href: "/protected/dashboard" },
     {
       id: "builder",
       label: "Builder",
@@ -54,118 +53,75 @@ export default function DashboardSidebar({
   return (
     <motion.div
       initial={false}
-      animate={{ width: sidebarOpen ? 260 : 78 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="bg-neutral-950 border-r border-neutral-800 flex flex-col h-full">
-    
-
+      animate={{ width: isHovered ? 280 : 80 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="bg-neutral-950 border-r border-neutral-800 flex flex-col h-full relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Navigation */}
-      <div className="flex-1 px-3 py-6 space-y-1 overflow-y-auto scrollbar-none">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.05,
-              },
-            },
-          }}
-          className="space-y-1"
-        >
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-            const Icon = item.icon
+      <div className="flex-1 px-4 py-8 space-y-3 overflow-y-auto">
+        {menuItems.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+          const Icon = item.icon
 
-            return (
-              <motion.div
-                key={item.id}
-                variants={{
-                  hidden: { opacity: 0, x: -10 },
-                  visible: { opacity: 1, x: 0 },
-                }}
-                transition={{ duration: 0.2 }}
+          return (
+            <div key={item.id} className="relative">
+              <Link
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group",
+                  isActive
+                    ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50"
+                )}
               >
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 group relative",
-                    isActive
-                      ? "bg-neutral-900 text-neutral-50 shadow-md"
-                      : "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-900/50"
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className="absolute left-0 top-0 bottom-0 w-1 bg-neutral-400 rounded-r"
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    />
-                  )}
-                  <Icon size={18} className="flex-shrink-0 ml-0.5" />
-                  {sidebarOpen && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.2, delay: 0.05 }}
-                      className="text-sm font-medium truncate"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </Link>
-              </motion.div>
-            )
-          })}
-        </motion.div>
+                <Icon size={20} className="flex-shrink-0" />
+                {isHovered && (
+                  <span className="text-base font-medium truncate">
+                    {item.label}
+                  </span>
+                )}
+              </Link>
+              
+              {/* Active indicator */}
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
+              )}
+            </div>
+          )
+        })}
       </div>
 
       {/* Footer */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="px-3 py-4 border-t border-neutral-800 space-y-1"
-      >
+      <div className="px-4 py-6 border-t border-neutral-800 space-y-2">
         <button
           onClick={() => router.push("/protected/settings")}
           className={cn(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200",
-            "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-900/50"
+            "w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200",
+            "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50"
           )}
         >
-          <Settings size={18} className="flex-shrink-0" />
-          {sidebarOpen && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2, delay: 0.05 }}
-              className="text-sm font-medium truncate"
-            >
+          <Settings size={20} className="flex-shrink-0" />
+          {isHovered && (
+            <span className="text-base font-medium truncate">
               Settings
-            </motion.span>
+            </span>
           )}
         </button>
 
         <button className={cn(
-          "w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200",
-          "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900/50"
+          "w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200",
+          "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50"
         )}>
-          <LogOut size={18} className="flex-shrink-0" />
-          {sidebarOpen && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2, delay: 0.05 }}
-              className="text-sm font-medium truncate"
-            >
+          <LogOut size={20} className="flex-shrink-0" />
+          {isHovered && (
+            <span className="text-base font-medium truncate">
               Logout
-            </motion.span>
+            </span>
           )}
         </button>
-      </motion.div>
+      </div>
     </motion.div>
   )
 }

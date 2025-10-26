@@ -4,11 +4,62 @@ import { motion } from 'framer-motion'
 import { PlusCircle, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { once } from 'events'
 
 export default function DashboardPage() {
-  const [hasPage] = useState(false)
+  const [hasPage, setHasPage] = useState<boolean | null>(null)
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
+
+  useEffect(() => {
+    checkUserPage()
+  }, [])
+
+  async function checkUserPage() {
+    try {
+      const supabase = createClient()
+      
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        router.push('/auth/login')
+        return
+      }
+
+      
+      const { data, error } = await supabase
+        .from('pages')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1)
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking page:', error)
+      }
+
+      setHasPage(data && data.length > 0)
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{duration: 0.4}}
+        >
+          <Sparkles className="w-8 h-8 text-neutral-400" />
+        </motion.div>
+      </div>
+    )
+  }
 
   if (!hasPage) {
     return (
@@ -29,12 +80,12 @@ export default function DashboardPage() {
             Welcome, Creator !
           </h1>
           <p className="text-neutral-400 text-sm">
-            You don’t have a bio page yet. Build your creator link page to share your socials and projects in one clean place.
+            You don't have a bio page yet. Build your creator link page to share your socials and projects in one clean place.
           </p>
 
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
-              onClick={() => router.push('pages/builder')}
+              onClick={() => router.push('/dashboard/pages/builder')}
               className="bg-neutral-200 hover:bg-neutral-700 text-neutral-900 border hover:text-neutral-200 border-neutral-700 hover:border-neutral-200 rounded-xl px-6 py-5"
             >
               <PlusCircle className="mr-2 h-5 w-5" />

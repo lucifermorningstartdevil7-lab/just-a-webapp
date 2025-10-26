@@ -1,4 +1,4 @@
-// components/pages/AnalyticsPage.tsx
+
 'use client'
 import { motion } from "framer-motion";
 import { TrendingUp, Users, MousePointerClick } from "lucide-react";

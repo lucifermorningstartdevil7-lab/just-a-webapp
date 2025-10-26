@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export default function CustomizationPage() {
+export default function customize() {
   const [theme, setTheme] = useState("dark");
   const [primaryColor, setPrimaryColor] = useState("#3B82F6");
   const [buttonStyle, setButtonStyle] = useState("rounded");
