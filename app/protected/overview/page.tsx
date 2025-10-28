@@ -1,17 +1,15 @@
 'use client'
 
-
 import { ChartAreaInteractive } from "@/app/components/chart-area-interactive"
-import { DataTable } from "@/app/components/data-table"
-import { SectionCards } from "@/app/components/section-cards"
-
 import { motion } from "framer-motion"
 import { Loader2, Link2, PlusCircle, Sparkles, BarChart3, MousePointerClick, Eye, Layers3, Zap, ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/app/components/ui/button"
 import { Badge } from "@/app/components/ui/badge"
+import { ABTestingPerformance } from "@/app/components/ab-test-performance"
+
 
 interface PageStats {
   totalViews: number
@@ -51,6 +49,7 @@ const fadeIn = (i = 0) => ({
 })
 
 export default function Page() {
+  const [pageId, setPageId] = useState<string | null>(null)
   const [hasPage, setHasPage] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState("Creator")
@@ -74,7 +73,7 @@ export default function Page() {
     checkUserPage()
   }, [timeRange])
 
-  async function checkUserPage() {
+  const checkUserPage = useCallback(async () => {
     try {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
@@ -93,6 +92,7 @@ export default function Page() {
         return
       }
 
+      setPageId(pageData.id)
       setHasPage(true)
 
       const { data: linksData } = await supabase
@@ -158,7 +158,7 @@ export default function Page() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router, timeRange])
 
   function getDateRange(range: "7d" | "30d" | "90d") {
     const days = range === "7d" ? 7 : range === "30d" ? 30 : 90
@@ -188,17 +188,17 @@ export default function Page() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-white to-green-50">
+      <div className="flex items-center justify-center h-screen bg-slate-50">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           className="text-center space-y-4"
         >
-          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto shadow-md">
             <Zap className="w-8 h-8 text-white" />
           </div>
           <Loader2 className="w-8 h-8 animate-spin text-green-600 mx-auto" />
-          <p className="text-gray-600 font-medium">Loading your dashboard...</p>
+          <p className="text-slate-600 font-medium">Loading your dashboard...</p>
         </motion.div>
       </div>
     )
@@ -206,29 +206,23 @@ export default function Page() {
 
   if (!hasPage) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-green-50">
-        {/* Animated Background Blurs */}
-        <div className="fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-200 rounded-full blur-3xl opacity-20 animate-pulse" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full blur-3xl opacity-20 animate-pulse delay-1000" />
-        </div>
-
+      <div className="min-h-screen bg-slate-50">
         <div className="container mx-auto px-6 py-12 flex items-center justify-center min-h-screen">
           <motion.div {...fadeIn(0)} className="text-center space-y-8 max-w-2xl">
             <div className="flex justify-center">
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="w-24 h-24 flex items-center justify-center rounded-2xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg shadow-green-500/25"
+                className="w-24 h-24 flex items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md"
               >
                 <Link2 className="w-10 h-10 text-white" />
               </motion.div>
             </div>
             
             <div className="space-y-4">
-              <motion.h2 {...fadeIn(1)} className="text-4xl font-bold text-gray-900">
+              <motion.h2 {...fadeIn(1)} className="text-3xl font-bold text-slate-800">
                 Welcome, {username}!
               </motion.h2>
-              <motion.p {...fadeIn(2)} className="text-xl text-gray-600 max-w-md mx-auto">
+              <motion.p {...fadeIn(2)} className="text-lg text-slate-600 max-w-md mx-auto">
                 Create your personalized link hub to start tracking engagement and grow your audience.
               </motion.p>
             </div>
@@ -237,32 +231,32 @@ export default function Page() {
               <Button 
                 size="lg" 
                 onClick={() => router.push("/protected/builder")}
-                className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg shadow-green-500/25 flex items-center space-x-2"
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md shadow-green-500/20 flex items-center space-x-2"
               >
                 <PlusCircle className="w-5 h-5" />
                 <span>Create Your Page</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
               
-              <Badge className="bg-green-50 text-green-700 border border-green-200 px-4 py-2 rounded-xl text-sm font-semibold">
-                <Sparkles className="w-4 h-4 mr-2" /> 
+              <Badge className="bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-md text-sm font-semibold">
+                <Sparkles className="w-4 h-4 mr-1" /> 
                 Free forever
               </Badge>
             </motion.div>
 
             {/* Stats Preview */}
-            <motion.div {...fadeIn(4)} className="grid grid-cols-3 gap-8 max-w-md mx-auto pt-8">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900 mb-2">3.2x</div>
-                <div className="text-sm text-gray-600">Higher CTR</div>
+            <motion.div {...fadeIn(4)} className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-md mx-auto pt-8">
+              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                <div className="text-2xl font-bold text-slate-800 mb-1">3.2x</div>
+                <div className="text-sm text-slate-500">Higher CTR</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900 mb-2">89%</div>
-                <div className="text-sm text-gray-600">Time Saved</div>
+              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                <div className="text-2xl font-bold text-slate-800 mb-1">89%</div>
+                <div className="text-sm text-slate-500">Time Saved</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900 mb-2">24/7</div>
-                <div className="text-sm text-gray-600">Auto-Optimization</div>
+              <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                <div className="text-2xl font-bold text-slate-800 mb-1">24/7</div>
+                <div className="text-sm text-slate-500">Auto-Optimization</div>
               </div>
             </motion.div>
           </motion.div>
@@ -304,64 +298,163 @@ export default function Page() {
 
   const chartData = analyticsData.map(i => ({
     date: i.date,
-    value: i.views,
-  }))
-
-  const tableData = allLinks.map(link => ({
-    id: link.id,
-    header: link.title,
-    sectionType: "Link",
-    status: link.is_active ? "Active" : "Hidden",
-    target: link.clicks,
-    limit: "-",
-    reviewer: link.performance,
+    views: i.views,
+    clicks: i.clicks,
+    engagement: i.engagement
   }))
 
   return (
-    
-      <>
-       
-        <div className="flex flex-1 flex-col bg-gradient-to-br from-white to-green-50/30">
-          <div className="@container/main flex flex-1 flex-col gap-6">
-            <div className="flex flex-col gap-6 py-6 md:gap-8 md:py-8">
-              {/* Welcome Header */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="px-6 lg:px-8"
-              >
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, {username}! 👋</h1>
-                  <p className="text-gray-600">Here's your latest performance analytics</p>
-                </div>
-              </motion.div>
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Welcome Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm"
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Welcome back, {username}! 👋</h1>
+              <p className="text-slate-600 mt-1">Here's your latest performance analytics</p>
+            </div>
+            <Button 
+              onClick={() => router.push("/protected/builder")}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2 rounded-lg flex items-center"
+            >
+              <PlusCircle className="w-4 h-4 mr-2" />
+              Edit Page
+            </Button>
+          </div>
+        </motion.div>
 
-              <SectionCards statsData={statsData} />
-              
-              <div className="px-6 lg:px-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
-                >
-                  <ChartAreaInteractive data={chartData} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
-                </motion.div>
+        {/* Stats Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
+          {statsData.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * index }}
+            >
+              <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-slate-100">
+                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">{stat.label}</p>
+                    <p className="text-2xl font-bold text-slate-800">{stat.value}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400 mt-3">{stat.subtitle}</p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Chart and A/B Testing */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+              <h2 className="text-lg font-semibold text-slate-800">Page Performance</h2>
+              <div className="flex gap-2">
+                {(['7d', '30d', '90d'] as const).map(range => (
+                  <button
+                    key={range}
+                    onClick={() => setTimeRange(range)}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                      timeRange === range
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : 'text-slate-600 hover:bg-slate-100 border border-slate-200'
+                    }`}
+                  >
+                    {range}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <ChartAreaInteractive data={chartData} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
+          </motion.div>
+
+          {/* Stats Summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+          >
+            <h2 className="text-lg font-semibold text-slate-800 mb-4">Quick Stats</h2>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-slate-600">Active Links</span>
+                  <span className="font-medium text-slate-800">{stats.activeLinks}</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div 
+                    className="bg-green-500 h-2 rounded-full" 
+                    style={{ width: `${Math.min(100, (stats.activeLinks / Math.max(stats.totalLinks, 1)) * 100)}%` }}
+                  ></div>
+                </div>
               </div>
               
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="px-6 lg:px-8"
-              >
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                  <DataTable data={tableData} />
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-slate-600">Engagement Rate</span>
+                  <span className="font-medium text-slate-800">{stats.engagementRate}</span>
                 </div>
-              </motion.div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div 
+                    className="bg-purple-500 h-2 rounded-full" 
+                    style={{ width: `${Math.min(100, parseFloat(stats.engagementRate))}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t border-slate-100">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Page Status</span>
+                  <Badge className="bg-green-100 text-green-700 border border-green-200">
+                    {stats.pageSlug ? 'Published' : 'Draft'}
+                  </Badge>
+                </div>
+                {stats.pageSlug && (
+                  <a 
+                    href={`/${stats.pageSlug}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-500 hover:underline mt-1 block"
+                  >
+                    View Page →
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
-    </>
+
+        {/* A/B Testing Performance */}
+        {pageId && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <ABTestingPerformance pageId={pageId} />
+          </motion.div>
+        )}
+      </div>
+    </div>
   )
 }

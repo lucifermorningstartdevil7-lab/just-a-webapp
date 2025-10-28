@@ -14,10 +14,10 @@ export function ScheduleEditor({ schedule, onChange }: ScheduleEditorProps) {
   const scheduleType = schedule?.type || 'always';
 
   return (
-    <div className="space-y-4 p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
+    <div className="space-y-4 p-4 border border-neutral-700 rounded-lg bg-white">
       <div className="flex items-center gap-2">
         <Clock className="w-4 h-4 text-neutral-400" />
-        <Label className="text-neutral-300">Link Schedule</Label>
+        <Label className="text-neutral-800">Link Schedule</Label>
       </div>
 
       <Select value={scheduleType} onValueChange={(type) => {
@@ -27,10 +27,10 @@ export function ScheduleEditor({ schedule, onChange }: ScheduleEditorProps) {
           onChange({ type, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
         }
       }}>
-        <SelectTrigger className="bg-neutral-700 border-neutral-600">
+        <SelectTrigger className="bg-white border-[#e2e8f0]">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent className="bg-neutral-800 border-neutral-700">
+        <SelectContent className="bg-white border-[#e2e8f0]">
           <SelectItem value="always">🟢 Always visible</SelectItem>
           <SelectItem value="specific_days">📅 Specific days</SelectItem>
           <SelectItem value="time_range">🕒 Time range</SelectItem>

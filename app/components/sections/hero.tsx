@@ -6,8 +6,16 @@ import { Zap, ArrowRight, Play, Sparkles } from 'lucide-react';
 
 import { TypeWriter } from '../Animations/Typewriter';
 import PreviewCard from '../ui/previewCard';
+import { useRouter } from 'next/navigation';
 
 export default function Hero() {
+
+
+  const router = useRouter();
+  const handleClick = (path:string) =>{
+    router.push(path)
+  }
+
   return (
     <section className="pt-20 pb-28 relative overflow-hidden">
       {/* Background Blurs */}
@@ -59,7 +67,7 @@ export default function Hero() {
               transition={{ delay: 0.4 }}
               className="flex flex-col sm:flex-row gap-4 items-center mb-12"
             >
-              <button className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg shadow-green-500/25 flex items-center space-x-2">
+              <button onClick={()=>handleClick('/auth/login') } className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg shadow-green-500/25 flex items-center space-x-2">
                 <span>Start Growing Free</span>
                 <ArrowRight className="w-4 h-4" />
               </button>

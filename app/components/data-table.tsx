@@ -128,9 +128,9 @@ function DragHandle({ id }: { id: number }) {
       {...listeners}
       variant="ghost"
       size="icon"
-      className="text-muted-foreground size-7 hover:bg-transparent"
+      className="text-slate-500 size-7 hover:bg-slate-100"
     >
-      <IconGripVertical className="text-muted-foreground size-3" />
+      <IconGripVertical className="text-slate-500 size-3" />
       <span className="sr-only">Drag to reorder</span>
     </Button>
   )
@@ -153,6 +153,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
+          className="border-slate-300 data-[state=checked]:bg-slate-600 data-[state=checked]:border-slate-600"
         />
       </div>
     ),
@@ -162,6 +163,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
+          className="border-slate-300 data-[state=checked]:bg-slate-600 data-[state=checked]:border-slate-600"
         />
       </div>
     ),
@@ -181,7 +183,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Section Type",
     cell: ({ row }) => (
       <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
+        <Badge variant="outline" className="text-slate-600 px-1.5 border-slate-300">
           {row.original.type}
         </Badge>
       </div>
@@ -191,9 +193,9 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
+      <Badge variant="outline" className="text-slate-600 px-1.5 border-slate-300">
         {row.original.status === "Done" ? (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+          <IconCircleCheckFilled className="fill-green-500" />
         ) : (
           <IconLoader />
         )}
@@ -219,7 +221,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           Target
         </Label>
         <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+          className="hover:bg-slate-50 focus-visible:bg-white h-8 w-16 border-slate-300 bg-transparent text-right shadow-none focus-visible:border-slate-400"
           defaultValue={row.original.target}
           id={`${row.original.id}-target`}
         />
@@ -244,7 +246,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           Limit
         </Label>
         <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+          className="hover:bg-slate-50 focus-visible:bg-white h-8 w-16 border-slate-300 bg-transparent text-right shadow-none focus-visible:border-slate-400"
           defaultValue={row.original.limit}
           id={`${row.original.id}-limit`}
         />
@@ -258,7 +260,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
       const isAssigned = row.original.reviewer !== "Assign reviewer"
 
       if (isAssigned) {
-        return row.original.reviewer
+        return <span className="text-slate-700">{row.original.reviewer}</span>
       }
 
       return (
@@ -268,13 +270,13 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           </Label>
           <Select>
             <SelectTrigger
-              className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
+              className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate border-slate-300 data-[placeholder]:text-slate-400"
               size="sm"
               id={`${row.original.id}-reviewer`}
             >
-              <SelectValue placeholder="Assign reviewer" />
+              <SelectValue placeholder="Assign reviewer" className="text-slate-400" />
             </SelectTrigger>
-            <SelectContent align="end">
+            <SelectContent align="end" className="border-slate-200 bg-white">
               <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
               <SelectItem value="Jamik Tashpulatov">
                 Jamik Tashpulatov
@@ -292,19 +294,19 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+            className="data-[state=open]:bg-slate-100 text-slate-500 flex size-8 hover:bg-slate-100"
             size="icon"
           >
             <IconDotsVertical />
             <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem>Make a copy</DropdownMenuItem>
-          <DropdownMenuItem>Favorite</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+        <DropdownMenuContent align="end" className="w-32 border-slate-200 bg-white">
+          <DropdownMenuItem className="text-slate-700">Edit</DropdownMenuItem>
+          <DropdownMenuItem className="text-slate-700">Make a copy</DropdownMenuItem>
+          <DropdownMenuItem className="text-slate-700">Favorite</DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-slate-200" />
+          <DropdownMenuItem variant="destructive" className="text-red-600">Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),

@@ -24,16 +24,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select"
-import { createClient } from "@/lib/supabase/client"
+
+
+interface ChartDataPoint {
+  date: string
+  views: number
+  clicks: number
+  engagement?: number
+}
 
 interface ChartAreaInteractiveProps {
-  data: Array<{
-    date: string
-    views: number
-    clicks: number
-  }>
-  timeRange: "7d" | "30d" | "90d"
-  onTimeRangeChange: (range: "7d" | "30d" | "90d") => void
+  data: ChartDataPoint[]
+  timeRange?: "7d" | "30d" | "90d"
+}
+
+interface ChartTotals {
+  totalViews: number
+  totalClicks: number
+  engagementRate: number
 }
 
 const chartConfig = {
@@ -47,108 +55,126 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartAreaInteractive({ data, timeRange, onTimeRangeChange }: ChartAreaInteractiveProps) {
+export function ChartAreaInteractive({ data, timeRange = "30d" }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile()
-
-  React.useEffect(() => {
-    if (isMobile && timeRange !== "7d") {
-      onTimeRangeChange("7d")
-    }
-  }, [isMobile, timeRange, onTimeRangeChange])
 
   // Filter data based on selected time range
   const filteredData = React.useMemo(() => {
     if (!data.length) return []
     
     const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90
+    // Use the latest date from the data as the end date
     const endDate = new Date(data[data.length - 1]?.date || new Date())
     const startDate = new Date(endDate)
-    startDate.setDate(startDate.getDate() - days + 1)
+    startDate.setDate(endDate.getDate() - days + 1)
     
-    return data.filter(item => {
+    // Filter data within the date range
+    const filtered = data.filter(item => {
       const itemDate = new Date(item.date)
       return itemDate >= startDate && itemDate <= endDate
     })
+    
+    // Sort the filtered data by date to ensure proper display
+    return filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   }, [data, timeRange])
 
-  // Format dates for display
-  const formatDate = (dateString: string) => {
+  // Format dates for display on X-axis
+  const formatDate = React.useCallback((dateString: string) => {
     const date = new Date(dateString)
     if (timeRange === "7d") {
       return date.toLocaleDateString("en-US", { weekday: "short" })
     } else if (timeRange === "30d") {
       return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-    } else {
-      return date.toLocaleDateString("en-US", { month: "short" })
+    } else { // 90d
+      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
     }
-  }
+  }, [timeRange])
 
   // Calculate totals for the card header
-  const totals = React.useMemo(() => {
-    const totalViews = filteredData.reduce((sum, day) => sum + day.views, 0)
-    const totalClicks = filteredData.reduce((sum, day) => sum + day.clicks, 0)
-    const engagementRate = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : 0
+  const totals = React.useMemo<ChartTotals>(() => {
+    const totalViews = filteredData.reduce((sum, day) => sum + (day.views || 0), 0)
+    const totalClicks = filteredData.reduce((sum, day) => sum + (day.clicks || 0), 0)
+    const engagementRate = totalViews > 0 ? parseFloat(((totalClicks / totalViews) * 100).toFixed(1)) : 0
     
     return { totalViews, totalClicks, engagementRate }
   }, [filteredData])
 
+  // Memoize the chart configuration to prevent unnecessary re-renders
+  const memoizedChartConfig = React.useMemo(() => chartConfig, [])
+
+  // Memoize the gradient elements to prevent unnecessary re-creation
+  const memoizedGradients = React.useMemo(() => (
+    <>
+      <linearGradient id="fillViews" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+        <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+      </linearGradient>
+      <linearGradient id="fillClicks" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
+      </linearGradient>
+    </>
+  ), [])
+
+  // Memoize the chart tooltip content
+  const memoizedTooltipContent = React.useMemo(() => (
+    <ChartTooltipContent
+      labelFormatter={(value) => {
+        const date = new Date(value)
+        return date.toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      }}
+      indicator="dot"
+      className="bg-white border border-slate-200 rounded-lg shadow-sm"
+    />
+  ), [])
+
+  // Memoize the legend to prevent unnecessary re-renders
+  const memoizedLegend = React.useMemo(() => (
+    <div className="flex justify-center gap-6 mt-4 pt-4 border-t border-slate-200">
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+        <span className="text-sm text-slate-600">Page Views</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+        <span className="text-sm text-slate-600">Link Clicks</span>
+      </div>
+    </div>
+  ), [])
+
   return (
-    <Card className="@container/card bg-white border border-gray-200 rounded-2xl shadow-sm">
+    <Card className="@container/card bg-white border border-slate-200 rounded-xl shadow-sm">
       <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col space-y-2">
           <div className="space-y-1">
-            <CardTitle className="text-xl font-bold text-gray-900">Performance Analytics</CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardTitle className="text-xl font-bold text-slate-800">Performance Analytics</CardTitle>
+            <CardDescription className="text-slate-600">
               {timeRange === "7d" && "Last 7 days"}
               {timeRange === "30d" && "Last 30 days"} 
               {timeRange === "90d" && "Last 90 days"}
-              <span className="hidden sm:inline"> • {totals.totalViews.toLocaleString()} views • {totals.engagementRate}% engagement</span>
+              <span> • {totals.totalViews.toLocaleString()} views • {totals.engagementRate}% engagement</span>
             </CardDescription>
           </div>
-          <CardAction>
-            <Select value={timeRange} onValueChange={onTimeRangeChange}>
-              <SelectTrigger
-                className="w-32 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
-                size="sm"
-                aria-label="Select time range"
-              >
-                <SelectValue placeholder="Select range" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border border-gray-200 bg-white">
-                <SelectItem value="7d" className="rounded-lg focus:bg-green-50">
-                  Last 7 days
-                </SelectItem>
-                <SelectItem value="30d" className="rounded-lg focus:bg-green-50">
-                  Last 30 days
-                </SelectItem>
-                <SelectItem value="90d" className="rounded-lg focus:bg-green-50">
-                  Last 90 days
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </CardAction>
         </div>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         {filteredData.length > 0 ? (
           <ChartContainer
-            config={chartConfig}
+            config={memoizedChartConfig}
             className="aspect-auto h-[250px] w-full"
           >
             <AreaChart data={filteredData}>
               <defs>
-                <linearGradient id="fillViews" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
-                </linearGradient>
-                <linearGradient id="fillClicks" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
-                </linearGradient>
+                {memoizedGradients}
               </defs>
               <CartesianGrid 
                 vertical={false} 
-                stroke="#f3f4f6" 
+                stroke="#e2e8f0" 
                 strokeDasharray="3 3"
               />
               <XAxis
@@ -156,29 +182,17 @@ export function ChartAreaInteractive({ data, timeRange, onTimeRangeChange }: Cha
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                minTickGap={timeRange === "7d" ? 0 : timeRange === "30d" ? 3 : 10}
+                minTickGap={timeRange === "7d" ? 8 : timeRange === "30d" ? 20 : 30}
                 tickFormatter={formatDate}
-                tick={{ fill: "#6b7280", fontSize: 12 }}
+                tick={{ fill: "#64748b", fontSize: 12 }}
               />
               <ChartTooltip
                 cursor={false}
-                content={
-                  <ChartTooltipContent
-                    labelFormatter={(value) => {
-                      return new Date(value).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })
-                    }}
-                    indicator="dot"
-                    className="bg-white border border-gray-200 rounded-lg shadow-lg"
-                  />
-                }
+                content={memoizedTooltipContent}
               />
               <Area
                 dataKey="views"
-                type="natural"
+                type="monotone"
                 fill="url(#fillViews)"
                 stroke="#10b981"
                 strokeWidth={2}
@@ -187,7 +201,7 @@ export function ChartAreaInteractive({ data, timeRange, onTimeRangeChange }: Cha
               />
               <Area
                 dataKey="clicks"
-                type="natural"
+                type="monotone"
                 fill="url(#fillClicks)"
                 stroke="#3b82f6"
                 strokeWidth={2}
@@ -211,18 +225,7 @@ export function ChartAreaInteractive({ data, timeRange, onTimeRangeChange }: Cha
         )}
         
         {/* Legend */}
-        {filteredData.length > 0 && (
-          <div className="flex justify-center gap-6 mt-4 pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span className="text-sm text-gray-600">Page Views</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span className="text-sm text-gray-600">Link Clicks</span>
-            </div>
-          </div>
-        )}
+        {filteredData.length > 0 && memoizedLegend}
       </CardContent>
     </Card>
   )

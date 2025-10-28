@@ -20,7 +20,7 @@ interface StatCard {
 
 export function SectionCards({ statsData }: { statsData: StatCard[] }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {statsData.map((stat, i) => {
         const Icon = stat.icon
         return (
@@ -28,14 +28,32 @@ export function SectionCards({ statsData }: { statsData: StatCard[] }) {
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            whileHover={{ y: -5, scale: 1.02 }}
+            transition={{ duration: 0.3, delay: i * 0.05 }}
           >
-            <Card className={`p-6 w-full transition-all duration-300 hover:shadow-xl border border-gray-200 group ${stat.bg ?? "bg-white"}`}>
-              <CardHeader className="pb-3">
-                <CardDescription className="text-sm font-medium text-gray-600">
-                  {stat.label}
-                </CardDescription>
+            <Card className="p-5 w-full transition-all duration-200 hover:shadow-md border border-slate-200 bg-white">
+              <CardHeader className="pb-3 p-0">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-slate-100">
+                    {Icon && <Icon className="w-5 h-5 text-slate-600" />}
+                  </div>
+                  <div>
+                    <CardDescription className="text-sm font-medium text-slate-500">
+                      {stat.label}
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-bold text-slate-800">
+                      {stat.value}
+                    </CardTitle>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-100">{stat.subtitle}</p>
+              </CardHeader>
+            </Card>
+          </motion.div>
+        )
+      })}
+    </div>
+  )
+}
                 <CardTitle className="text-2xl font-bold text-gray-900">
                   {stat.value}
                 </CardTitle>
