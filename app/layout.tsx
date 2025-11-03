@@ -1,6 +1,5 @@
   import type { Metadata } from "next";
-  import { Montserrat } from "next/font/google";
-  import { ThemeProvider } from "next-themes";
+  import { Inter } from "next/font/google";
   import "./globals.css";
 
   const defaultUrl = process.env.VERCEL_URL
@@ -9,19 +8,14 @@
 
   export const metadata: Metadata = {
     metadataBase: new URL(defaultUrl),
- 
-    title: "ClickSprout",
-    description: "Not just a bio-link builder..",
-  
     title: "LinkTrim - Your clean link-in-bio",
     description: "Build a beautiful, sharable page for your socials or projects. Simple, fast, and designed for creators.",
     icons: {
       icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔗</text></svg>',
     },
-   
   };
 
-  const mont = Montserrat({subsets: ['latin'], variable: '--font-montserrat', display: 'swap'})
+  const inter = Inter({subsets: ['latin'], variable: '--font-inter', display: 'swap'})
 
 
   export default function RootLayout({
@@ -31,15 +25,8 @@
   }>) {
     return (
       <html lang="en" suppressHydrationWarning>
-        <body className={`${mont.className} antialiased`}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+        <body className={`${inter.className} antialiased`}>
             {children}
-          </ThemeProvider>
         </body>
       </html>
     );

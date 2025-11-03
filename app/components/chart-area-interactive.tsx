@@ -106,12 +106,12 @@ export function ChartAreaInteractive({ data, timeRange = "30d" }: ChartAreaInter
   const memoizedGradients = React.useMemo(() => (
     <>
       <linearGradient id="fillViews" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-        <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+        <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
+        <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0.05} />
       </linearGradient>
       <linearGradient id="fillClicks" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
+        <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
+        <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0.05} />
       </linearGradient>
     </>
   ), [])
@@ -129,31 +129,31 @@ export function ChartAreaInteractive({ data, timeRange = "30d" }: ChartAreaInter
         })
       }}
       indicator="dot"
-      className="bg-white border border-slate-200 rounded-lg shadow-sm"
+      className="bg-card border border-border rounded-lg shadow-sm"
     />
   ), [])
 
   // Memoize the legend to prevent unnecessary re-renders
   const memoizedLegend = React.useMemo(() => (
-    <div className="flex justify-center gap-6 mt-4 pt-4 border-t border-slate-200">
+    <div className="flex justify-center gap-6 mt-4 pt-4 border-t border-border">
       <div className="flex items-center gap-2">
         <div className="w-3 h-3 rounded-full bg-green-500"></div>
-        <span className="text-sm text-slate-600">Page Views</span>
+        <span className="text-sm text-muted-foreground">Page Views</span>
       </div>
       <div className="flex items-center gap-2">
         <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-        <span className="text-sm text-slate-600">Link Clicks</span>
+        <span className="text-sm text-muted-foreground">Link Clicks</span>
       </div>
     </div>
   ), [])
 
   return (
-    <Card className="@container/card bg-white border border-slate-200 rounded-xl shadow-sm">
+    <Card className="@container/card bg-card border border-border rounded-xl shadow-sm">
       <CardHeader className="pb-4">
         <div className="flex flex-col space-y-2">
           <div className="space-y-1">
-            <CardTitle className="text-xl font-bold text-slate-800">Performance Analytics</CardTitle>
-            <CardDescription className="text-slate-600">
+            <CardTitle className="text-xl font-bold text-foreground">Performance Analytics</CardTitle>
+            <CardDescription className="text-muted-foreground">
               {timeRange === "7d" && "Last 7 days"}
               {timeRange === "30d" && "Last 30 days"} 
               {timeRange === "90d" && "Last 90 days"}

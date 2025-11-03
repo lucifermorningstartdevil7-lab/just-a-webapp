@@ -1,313 +1,150 @@
 'use client'
-import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ProfileCardProps {
   avatarUrl: string;
   name: string;
   username: string;
+  bio?: string;
+  stats?: {
+    followers?: number;
+    views?: number;
+    posts?: number;
+    engagement?: number;
+    growth?: number;
+  };
   className?: string;
   enableTilt?: boolean;
 }
 
-const clamp = (value: number, min = 0, max = 100): number => Math.min(Math.max(value, min), max);
-const round = (value: number, precision = 3): number => parseFloat(value.toFixed(precision));
-const adjust = (value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number =>
-  round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
-const easeInOutCubic = (x: number): number => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-
-const ProfileCardComponent: React.FC<ProfileCardProps> = ({
+const ProfileCard: React.FC<ProfileCardProps> = ({
   avatarUrl,
   name,
   username,
+  bio = "Building the future of creator tools",
+  stats,
   className = '',
-  enableTilt = true
+  enableTilt = false
 }) => {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const animationHandlers = useMemo(() => {
-    if (!enableTilt) return null;
-
-    let rafId: number | null = null;
-
-    const updateCardTransform = (offsetX: number, offsetY: number, card: HTMLElement, wrap: HTMLElement) => {
-      const width = card.clientWidth;
-      const height = card.clientHeight;
-
-      const percentX = clamp((100 / width) * offsetX);
-      const percentY = clamp((100 / height) * offsetY);
-
-      const centerX = percentX - 50;
-      const centerY = percentY - 50;
-
-      const properties = {
-        '--pointer-x': `${percentX}%`,
-        '--pointer-y': `${percentY}%`,
-        '--pointer-from-center': `${clamp(Math.hypot(percentY - 50, percentX - 50) / 50, 0, 1)}`,
-        '--pointer-from-top': `${percentY / 100}`,
-        '--pointer-from-left': `${percentX / 100}`,
-        '--rotate-x': `${round(-(centerX / 3.5))}deg`,
-        '--rotate-y': `${round(centerY / 3.5)}deg`
-      };
-
-      Object.entries(properties).forEach(([property, value]) => {
-        wrap.style.setProperty(property, value);
-      });
-    };
-
-    const createSmoothAnimation = (
-      duration: number,
-      startX: number,
-      startY: number,
-      card: HTMLElement,
-      wrap: HTMLElement
-    ) => {
-      const startTime = performance.now();
-      const targetX = wrap.clientWidth / 2;
-      const targetY = wrap.clientHeight / 2;
-
-      const animationLoop = (currentTime: number) => {
-        const elapsed = currentTime - startTime;
-        const progress = clamp(elapsed / duration);
-        const easedProgress = easeInOutCubic(progress);
-
-        const currentX = adjust(easedProgress, 0, 1, startX, targetX);
-        const currentY = adjust(easedProgress, 0, 1, startY, targetY);
-
-        updateCardTransform(currentX, currentY, card, wrap);
-
-        if (progress < 1) {
-          rafId = requestAnimationFrame(animationLoop);
-        }
-      };
-
-      rafId = requestAnimationFrame(animationLoop);
-    };
-
-    return {
-      updateCardTransform,
-      createSmoothAnimation,
-      cancelAnimation: () => {
-        if (rafId) {
-          cancelAnimationFrame(rafId);
-          rafId = null;
-        }
-      }
-    };
-  }, [enableTilt]);
-
-  const handlePointerMove = useCallback(
-    (event: PointerEvent) => {
-      const card = cardRef.current;
-      const wrap = wrapRef.current;
-
-      if (!card || !wrap || !animationHandlers) return;
-
-      const rect = card.getBoundingClientRect();
-      animationHandlers.updateCardTransform(event.clientX - rect.left, event.clientY - rect.top, card, wrap);
-    },
-    [animationHandlers]
-  );
-
-  const handlePointerEnter = useCallback(() => {
-    const card = cardRef.current;
-    const wrap = wrapRef.current;
-
-    if (!card || !wrap || !animationHandlers) return;
-
-    animationHandlers.cancelAnimation();
-    wrap.style.setProperty('--card-opacity', '1');
-  }, [animationHandlers]);
-
-  const handlePointerLeave = useCallback(
-    (event: PointerEvent) => {
-      const card = cardRef.current;
-      const wrap = wrapRef.current;
-
-      if (!card || !wrap || !animationHandlers) return;
-
-      animationHandlers.createSmoothAnimation(600, event.offsetX, event.offsetY, card, wrap);
-      wrap.style.setProperty('--card-opacity', '0');
-    },
-    [animationHandlers]
-  );
+  const [isVisible, setIsVisible] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=200&background=0ea5e9&color=ffffff`;
 
   useEffect(() => {
-    if (!enableTilt || !animationHandlers) return;
+    setIsVisible(true);
+  }, []);
 
-    const card = cardRef.current;
-    const wrap = wrapRef.current;
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!enableTilt) return;
+    
+    const card = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - card.left) / card.width) * 100;
+    const y = ((e.clientY - card.top) / card.height) * 100;
+    setMousePosition({ x, y });
+    
+    // Calculate tilt effect
+    const tiltX = (y - 50) / 25;
+    const tiltY = (50 - x) / 25;
+    setTilt({ x: tiltX, y: tiltY });
+  };
 
-    if (!card || !wrap) return;
-
-    // Initialize CSS variables on mount to avoid hydration mismatch
-    wrap.style.setProperty('--pointer-x', '50%');
-    wrap.style.setProperty('--pointer-y', '50%');
-    wrap.style.setProperty('--pointer-from-center', '0');
-    wrap.style.setProperty('--pointer-from-top', '0.5');
-    wrap.style.setProperty('--pointer-from-left', '0.5');
-    wrap.style.setProperty('--card-opacity', '0');
-    wrap.style.setProperty('--rotate-x', '0deg');
-    wrap.style.setProperty('--rotate-y', '0deg');
-
-    const pointerMoveHandler = handlePointerMove as EventListener;
-    const pointerEnterHandler = handlePointerEnter as EventListener;
-    const pointerLeaveHandler = handlePointerLeave as EventListener;
-
-    card.addEventListener('pointerenter', pointerEnterHandler);
-    card.addEventListener('pointermove', pointerMoveHandler);
-    card.addEventListener('pointerleave', pointerLeaveHandler);
-
-    const initialX = wrap.clientWidth / 2;
-    const initialY = wrap.clientHeight / 2;
-
-    animationHandlers.updateCardTransform(initialX, initialY, card, wrap);
-
-    return () => {
-      card.removeEventListener('pointerenter', pointerEnterHandler);
-      card.removeEventListener('pointermove', pointerMoveHandler);
-      card.removeEventListener('pointerleave', pointerLeaveHandler);
-      animationHandlers.cancelAnimation();
-    };
-  }, [enableTilt, animationHandlers, handlePointerMove, handlePointerEnter, handlePointerLeave]);
+  const handleMouseLeave = () => {
+    if (enableTilt) {
+      setTilt({ x: 0, y: 0 });
+    }
+  };
 
   return (
-    <div 
-      ref={wrapRef} 
-      className={`relative ${className}`.trim()}
-      style={{
-        perspective: '1000px',
-        '--pointer-x': '50%',
-        '--pointer-y': '50%',
-        '--pointer-from-center': '0',
-        '--pointer-from-top': '0.5',
-        '--pointer-from-left': '0.5',
-        '--card-opacity': '0',
-        '--rotate-x': '0deg',
-        '--rotate-y': '0deg'
-      } as React.CSSProperties}
-    >
-      {/* Animated Background Glow */}
-      <div 
-        className="absolute -inset-8 rounded-[32px] opacity-0 transition-opacity duration-500 blur-3xl"
-        style={{
-          background: `
-            radial-gradient(circle at var(--pointer-x) var(--pointer-y), 
-              rgba(168, 85, 247, calc(var(--card-opacity) * 0.4)) 0%,
-              rgba(59, 130, 246, calc(var(--card-opacity) * 0.3)) 25%,
-              rgba(16, 185, 129, calc(var(--card-opacity) * 0.2)) 50%,
-              transparent 80%
-            )
-          `,
-          opacity: 'var(--card-opacity)'
-        }}
-      />
-      
+    <div className={`w-full ${className}`}>
       {/* Main Card */}
       <div 
-        ref={cardRef}
-        className="relative w-full aspect-[0.7] max-w-sm mx-auto rounded-[32px] overflow-hidden cursor-pointer
-                   transition-transform duration-200 ease-out"
+        className={`relative transition-all duration-700 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)',
-          boxShadow: `
-            0 20px 60px -15px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(255, 255, 255, 0.1),
-            inset 0 1px 0 0 rgba(255, 255, 255, 0.1)
-          `,
-          transform: `
-            perspective(1000px)
-            rotateX(var(--rotate-y))
-            rotateY(var(--rotate-x))
-            translateZ(0)
-          `
+          transform: enableTilt ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : 'none',
+          transition: 'transform 0.1s ease-out'
         }}
       >
-        {/* Gradient Overlay on Hover */}
-        <div 
-          className="absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none"
-          style={{
-            background: `
-              radial-gradient(circle at var(--pointer-x) var(--pointer-y),
-                rgba(168, 85, 247, 0.15) 0%,
-                rgba(59, 130, 246, 0.1) 30%,
-                transparent 60%
-              )
-            `,
-            opacity: 'calc(var(--card-opacity) * 0.8)'
-          }}
-        />
-
-        {/* Shine Effect */}
-        <div 
-          className="absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none"
-          style={{
-            background: `
-              linear-gradient(
-                135deg,
-                transparent 0%,
-                rgba(255, 255, 255, 0.03) calc(var(--pointer-x) - 20%),
-                rgba(255, 255, 255, 0.08) var(--pointer-x),
-                rgba(255, 255, 255, 0.03) calc(var(--pointer-x) + 20%),
-                transparent 100%
-              )
-            `,
-            opacity: 'var(--card-opacity)'
-          }}
-        />
-
-        {/* Content Container */}
-        <div className="relative w-full h-full flex flex-col">
-          {/* Avatar Section - Takes most space */}
-          <div className="flex-1 flex items-end justify-center px-8 pt-12 pb-6">
-            <div className="relative w-full max-w-[280px]">
-              {/* Glow behind avatar */}
-              <div 
-                className="absolute inset-0 rounded-full blur-3xl opacity-30"
-                style={{
-                  background: 'radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, transparent 70%)',
-                  transform: 'scale(1.2)'
-                }}
-              />
-              
-              {/* Avatar Image */}
-              <img
-                src={avatarUrl}
-                alt={name}
-                className="relative w-full h-auto aspect-square object-cover rounded-full
-                         border-2 border-white/10 shadow-2xl"
-                style={{
-                  transform: `translateZ(20px)`,
-                  filter: 'brightness(1.05) contrast(1.05)'
-                }}
-                loading="lazy"
-                onError={e => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=400&background=6366f1&color=fff`;
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Info Section - Bottom */}
-          <div className="px-8 pb-8">
-            <div 
-              className="relative bg-white/5 backdrop-blur-xl rounded-2xl p-5 border border-white/10
-                         shadow-lg"
-              style={{
-                transform: 'translateZ(30px)'
-              }}
-            >
-              {/* Centered User Info */}
-              <div className="flex flex-col items-center justify-center text-center space-y-2">
-                <h2 className="text-xl font-bold text-white truncate max-w-full">
-                  {name}
-                </h2>
-                <p className="text-sm text-white/60 truncate max-w-full">
-                  @{username}
-                </p>
+        {/* Card Container */}
+        <div className="relative bg-white border border-slate-200 rounded-3xl shadow-lg overflow-hidden">
+          <div className="p-6">
+            {/* Header */}
+            <div className="text-center mb-6">
+              {/* Avatar Container */}
+              <div className="relative inline-block mb-4">
+                {/* Avatar */}
+                <div className="w-20 h-20 rounded-full border-2 border-white overflow-hidden shadow-md mx-auto">
+                  <img
+                    src={avatarUrl}
+                    alt={name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = fallbackAvatar;
+                    }}
+                  />
+                </div>
               </div>
+
+              {/* Name & Username */}
+              <h2 className="text-xl font-bold text-slate-800 mb-1">
+                {name}
+              </h2>
+              <p className="text-slate-500 text-sm mb-3">
+                @{username}
+              </p>
+              
+              {/* Bio */}
+              {bio && (
+                <p className="text-slate-600 text-sm leading-relaxed max-w-xs mx-auto">
+                  {bio}
+                </p>
+              )}
             </div>
+
+            {/* Stats Grid */}
+            {(stats && (stats.followers !== undefined || stats.views !== undefined || stats.posts !== undefined)) ? (
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {stats.followers !== undefined && (
+                  <div 
+                    key="followers"
+                    className="text-center p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  >
+                    <div className="text-lg font-bold text-slate-800 mb-1">
+                      {stats.followers.toLocaleString()}
+                    </div>
+                    <div className="text-slate-500 text-xs">Followers</div>
+                  </div>
+                )}
+                {stats.views !== undefined && (
+                  <div 
+                    key="views"
+                    className="text-center p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  >
+                    <div className="text-lg font-bold text-slate-800 mb-1">
+                      {stats.views.toLocaleString()}
+                    </div>
+                    <div className="text-slate-500 text-xs">Views</div>
+                  </div>
+                )}
+                {stats.posts !== undefined && (
+                  <div 
+                    key="posts"
+                    className="text-center p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  >
+                    <div className="text-lg font-bold text-slate-800 mb-1">
+                      {stats.posts.toLocaleString()}
+                    </div>
+                    <div className="text-slate-500 text-xs">Posts</div>
+                  </div>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -315,4 +152,4 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   );
 };
 
-export default React.memo(ProfileCardComponent);
+export default ProfileCard;
