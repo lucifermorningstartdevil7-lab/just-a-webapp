@@ -1,6 +1,6 @@
   import type { Metadata } from "next";
-  import { Inter } from "next/font/google";
-  import "./globals.css";
+import "./globals.css";
+import { ThemeProvider } from "./components/theme-provider";
 
   const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -8,15 +8,12 @@
 
   export const metadata: Metadata = {
     metadataBase: new URL(defaultUrl),
-    title: "LinkTrim - Your clean link-in-bio",
+    title: "ClickSprout.to",
     description: "Build a beautiful, sharable page for your socials or projects. Simple, fast, and designed for creators.",
     icons: {
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔗</text></svg>',
+      icon: '/logo.png',
     },
   };
-
-  const inter = Inter({subsets: ['latin'], variable: '--font-inter', display: 'swap'})
-
 
   export default function RootLayout({
     children,
@@ -24,9 +21,11 @@
     children: React.ReactNode;
   }>) {
     return (
-      <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.className} antialiased`}>
+      <html lang="en" className="font-system" suppressHydrationWarning>
+        <body className="antialiased">
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             {children}
+          </ThemeProvider>
         </body>
       </html>
     );

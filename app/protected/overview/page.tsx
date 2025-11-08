@@ -1,14 +1,16 @@
 'use client'
 
-import { ChartAreaInteractive } from "@/app/components/chart-area-interactive"
+
 import { motion } from "framer-motion"
 import { Loader2, Link2, PlusCircle, Sparkles, BarChart3, MousePointerClick, Eye, Layers3, Zap, ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { syncAuthUserToPublic } from "../customize/sync-user"
 import { Button } from "@/app/components/ui/button"
 import { Badge } from "@/app/components/ui/badge"
 import { ThemeToggle } from "@/app/components/ThemeToggle"
+import ChartAreaInteractive from "@/app/components/chart-area-interactive"
 
 
 
@@ -79,6 +81,9 @@ export default function Page() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return router.push("/auth/login")
+
+      // Sync user to public.users table
+      await syncAuthUserToPublic(user)
 
       setUsername(user.email?.split("@")[0] ?? "User")
 
@@ -193,17 +198,19 @@ export default function Page() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center space-y-6"
         >
-          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto shadow-md">
-            <Zap className="w-8 h-8 text-white" />
+          <div className="flex justify-center">
+            <div className="w-12 h-12 border-4 border-muted border-t-foreground rounded-full animate-spin" />
           </div>
-          <Loader2 className="w-8 h-8 animate-spin text-green-600 mx-auto" />
-          <p className="text-muted-foreground font-medium">Loading your dashboard...</p>
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium text-foreground">Loading dashboard</h3>
+            <p className="text-sm text-muted-foreground">Please wait while we prepare your data</p>
+          </div>
         </motion.div>
       </div>
     )
@@ -235,7 +242,7 @@ export default function Page() {
             <motion.div {...fadeIn(3)} className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <Button 
                 size="lg" 
-                onClick={() => router.push("/protected/builder")}
+                onClick={() => router.push("/protected/customize")}
                 className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md shadow-green-500/20 flex items-center space-x-2"
               >
                 <PlusCircle className="w-5 h-5" />
@@ -243,7 +250,7 @@ export default function Page() {
                 <ArrowRight className="w-4 h-4" />
               </Button>
               
-              <Badge className="bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-md text-sm font-semibold">
+              <Badge className="bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1 rounded-md text-sm font-semibold">
                 <Sparkles className="w-4 h-4 mr-1" /> 
                 Free forever
               </Badge>
@@ -382,22 +389,8 @@ export default function Page() {
           className="bg-card rounded-xl border border-border shadow-sm p-5 max-w-4xl"
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Page Performance</h2>
-            <div className="flex gap-2">
-              {(['7d', '30d', '90d'] as const).map(range => (
-                <button
-                  key={range}
-                  onClick={() => setTimeRange(range)}
-                  className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                    timeRange === range
-                      ? 'bg-green-100 text-green-700 border border-green-200'
-                      : 'text-slate-600 hover:bg-slate-100 border border-slate-200'
-                  }`}
-                >
-                  {range}
-                </button>
-              ))}
-            </div>
+            <h2 className="text-2xl font-semibold text-foreground">Page Performance</h2>
+            
           </div>
           <ChartAreaInteractive data={chartData} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
         </motion.div>
