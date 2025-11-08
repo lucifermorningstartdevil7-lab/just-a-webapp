@@ -543,45 +543,47 @@ export default function CustomizePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-10">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         {/* --- Header & Save Button --- */}
-        <CustomizeHeader
-          isFirstTime={isFirstTime}
-          saving={saving}
-          saved={saved}
-          saveCustomization={saveCustomization}
-        />
+        <div className="max-w-4xl space-y-6">
+          <CustomizeHeader
+            isFirstTime={isFirstTime}
+            saving={saving}
+            saved={saved}
+            saveCustomization={saveCustomization}
+          />
 
-        {/* --- Success Alert --- */}
-        {saved && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-          >
-            <Alert className="bg-green-50 border-green-200 mb-6">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <AlertDescription className="text-green-800 font-medium ml-2">
-                {isFirstTime
-                  ? 'Your page has been created successfully! You can now customize it further or add more links.'
-                  : 'Your changes have been saved successfully!'}
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
+          {/* --- Success Alert --- */}
+          {saved && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <Alert className="bg-green-50 border-green-200 mb-6">
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                <AlertDescription className="text-green-800 font-medium ml-2">
+                  {isFirstTime
+                    ? 'Your page has been created successfully! You can now customize it further or add more links.'
+                    : 'Your changes have been saved successfully!'}
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
 
-        {/* --- Onboarding Banner --- */}
-        <OnboardingCard isFirstTime={isFirstTime} />
+          {/* --- Onboarding Banner --- */}
+          <OnboardingCard isFirstTime={isFirstTime} />
 
-        {/* --- First Time Profile Form --- */}
-        <ProfileFormCard
-          isFirstTime={isFirstTime}
-          previewData={previewData}
-          setPreviewData={setPreviewData}
-        />
+          {/* --- First Time Profile Form --- */}
+          <ProfileFormCard
+            isFirstTime={isFirstTime}
+            previewData={previewData}
+            setPreviewData={setPreviewData}
+          />
+        </div>
 
         {/* --- Main Content Settings --- */}
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mt-6 space-y-6">
           {/* --- THIS IS THE NEW CARD YOU WANTED --- */}
           <BundleManagementCard
             pageId={pageId}

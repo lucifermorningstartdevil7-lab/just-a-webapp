@@ -20,8 +20,16 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-900 text-white py-16 border-t border-gray-800">
-      <div className="container mx-auto px-6">
+    <footer className="bg-zinc-950 text-white py-16 border-t border-zinc-800 relative overflow-hidden">
+      {/* Top seamless transition */}
+      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white to-transparent dark:from-gray-900"></div>
+      
+      {/* Animated background elements */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-1/2 -right-1/3 w-[800px] h-[800px] rounded-full bg-gradient-to-r from-green-500/10 to-blue-500/5 blur-3xl"></div>
+      </div>
+      
+      <div className="container mx-auto px-6 relative z-10">
         {/* Main Footer Content */}
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
@@ -41,7 +49,7 @@ export default function Footer() {
               </motion.div>
               <span className="text-2xl font-bold">ClickSprout</span>
             </div>
-            <p className="text-gray-400 mb-6 max-w-md">
+            <p className="text-zinc-400 mb-6 max-w-md">
               The intelligent bio-link platform that helps creators maximize engagement and grow their audience automatically.
             </p>
             <div className="flex space-x-4">
@@ -51,7 +59,7 @@ export default function Footer() {
                   href={social.href}
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-colors duration-200"
+                  className="w-10 h-10 bg-zinc-800/80 backdrop-blur-sm hover:bg-zinc-700/80 rounded-lg flex items-center justify-center transition-colors duration-200 border border-zinc-700/50"
                   aria-label={social.label}
                 >
                   {social.icon}
@@ -73,7 +81,7 @@ export default function Footer() {
                   <motion.a
                     href={link.href}
                     whileHover={{ x: 5 }}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
+                    className="text-zinc-400 hover:text-white transition-colors duration-200"
                   >
                     {link.name}
                   </motion.a>
@@ -94,7 +102,7 @@ export default function Footer() {
                 <motion.a
                   href="#"
                   whileHover={{ x: 5 }}
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className="text-zinc-400 hover:text-white transition-colors duration-200"
                 >
                   About
                 </motion.a>
@@ -103,7 +111,7 @@ export default function Footer() {
                 <motion.a
                   href="#"
                   whileHover={{ x: 5 }}
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className="text-zinc-400 hover:text-white transition-colors duration-200"
                 >
                   Blog
                 </motion.a>
@@ -112,7 +120,7 @@ export default function Footer() {
                 <motion.a
                   href="#"
                   whileHover={{ x: 5 }}
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className="text-zinc-400 hover:text-white transition-colors duration-200"
                 >
                   Careers
                 </motion.a>
@@ -121,7 +129,7 @@ export default function Footer() {
                 <motion.a
                   href="#"
                   whileHover={{ x: 5 }}
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className="text-zinc-400 hover:text-white transition-colors duration-200"
                 >
                   Press
                 </motion.a>
@@ -135,9 +143,9 @@ export default function Footer() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center"
+          className="pt-8 border-t border-zinc-800/50 flex flex-col md:flex-row justify-between items-center"
         >
-          <div className="text-gray-400 text-sm mb-4 md:mb-0">
+          <div className="text-zinc-400 text-sm mb-4 md:mb-0">
             © {currentYear} ClickSprout. All rights reserved.
           </div>
           
@@ -147,7 +155,7 @@ export default function Footer() {
                 key={index}
                 href={link.href}
                 whileHover={{ scale: 1.05 }}
-                className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
+                className="text-zinc-400 hover:text-white transition-colors duration-200 text-sm"
               >
                 {link.name}
               </motion.a>
